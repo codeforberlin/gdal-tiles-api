@@ -58,10 +58,15 @@ def extract_tile(
     if not tile:
         raise RuntimeError("gdal.Warp failed to produce output")
 
-    return create_png(tile, width, height)
+    image = create_image(tile, width, height)
+
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    buffer.seek(0)
+    return buffer
 
 
-def create_png(dataset, width, height):
+def create_image(dataset, width, height, alpha=False):
     channels = (1, 1, 1) if dataset.RasterCount == 1 else (1, 2, 3)
 
     band_arrays = []
@@ -73,21 +78,15 @@ def create_png(dataset, width, height):
         band_arrays.append(array)
         nodata_values.append(band.GetNoDataValue())
 
-    alpha = bytearray(width * height)
-    nodata_values = [dataset.GetRasterBand(i).GetNoDataValue() for i in channels]
+    rgb = np.stack(band_arrays, axis=-1)
 
-    band_stack = np.stack(band_arrays, axis=-1)
+    if alpha:
+        a = np.full((height, width), 255, dtype=np.uint8)
+        for i, nodata in enumerate(nodata_values):
+            if nodata is not None:
+                a[band_arrays[i] == int(nodata)] = 0
 
-    alpha = np.full((height, width), 255, dtype=np.uint8)
-    for i, nodata in enumerate(nodata_values):
-        if nodata is not None:
-            alpha[band_arrays[i] == int(nodata)] = 0
-
-    rgba = np.dstack([band_stack, alpha])
-
-    image = Image.fromarray(rgba, mode="RGBA")
-
-    buffer = io.BytesIO()
-    image.save(buffer, format="PNG")
-    buffer.seek(0)
-    return buffer
+        rgba = np.dstack([rgb, a])
+        return Image.fromarray(rgba, mode="RGBA")
+    else:
+        return Image.fromarray(rgb, mode="RGB")
