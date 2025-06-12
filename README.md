@@ -59,7 +59,7 @@ Install the package
 
 ```bash
 pip install gdal-tiles-api
-pip install https://github.com/codeforberlin/gdal-tiles-api  # directly from GitHub
+pip install git+https://github.com/codeforberlin/gdal-tiles-api  # directly from GitHub
 ```
 
 Usage
@@ -181,13 +181,12 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
 
-        proxy_redirect off;
-        proxy_buffering off;
-        proxy_pass unix:/run/gunicorn/tiles.sock;
+        proxy_pass http://unix:/run/gunicorn/tiles.sock;
 
         proxy_cache tiles;
         proxy_cache_valid 200 302 404 7d;
         proxy_cache_use_stale error timeout updating;
         add_header X-Cache-Status $upstream_cache_status;
     }
+}
 ```

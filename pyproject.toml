@@ -28,18 +28,20 @@ dynamic = [
   "version",
 ]
 dependencies = [
-  "GDAL>=3",
+  "deepmerge>=2",
   "fastapi[standard]",
-  "pillow>=11"
+  "GDAL>=3",
+  "numpy>=11",
+  "pillow>=11",
 ]
 
 [project.optional-dependencies]
 dev = [
     "build",
     "pre-commit",
+    "pytest",
     "ruff",
     "twine",
-    "pytest",
 ]
 
 [project.urls]
