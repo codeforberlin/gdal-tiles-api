@@ -31,7 +31,7 @@ dependencies = [
   "deepmerge>=2",
   "fastapi[standard]",
   "GDAL>=3",
-  "numpy>=11",
+  "numpy>=2",
   "pillow>=11",
 ]
 
