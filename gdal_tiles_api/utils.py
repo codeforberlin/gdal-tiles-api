@@ -52,8 +52,7 @@ def extract_tile(
         width=width,
         height=height,
         resampleAlg=resample_methods.get(resample.lower(), gdal.GRA_Cubic),
-        srcNodata=0,
-        dstNodata=0,
+        options=["-dstalpha"],
     )
     if not tile:
         raise RuntimeError("gdal.Warp failed to produce output")
@@ -66,27 +65,23 @@ def extract_tile(
     return buffer
 
 
-def create_image(dataset, width, height, alpha=False):
-    channels = (1, 1, 1) if dataset.RasterCount == 1 else (1, 2, 3)
+def create_image(dataset, width, height):
+    raster_count = dataset.RasterCount
 
-    band_arrays = []
-    nodata_values = []
-    for i in channels:
+    bands = []
+    for i in range(1, raster_count + 1):
         band = dataset.GetRasterBand(i)
         raster = band.ReadRaster(0, 0, width, height, buf_type=gdal.GDT_Byte)
         array = np.frombuffer(raster, dtype=np.uint8).reshape((height, width))
-        band_arrays.append(array)
-        nodata_values.append(band.GetNoDataValue())
+        bands.append(array)
 
-    rgb = np.stack(band_arrays, axis=-1)
-
-    if alpha:
-        a = np.full((height, width), 255, dtype=np.uint8)
-        for i, nodata in enumerate(nodata_values):
-            if nodata is not None:
-                a[band_arrays[i] == int(nodata)] = 0
-
-        rgba = np.dstack([rgb, a])
-        return Image.fromarray(rgba, mode="RGBA")
+    if raster_count == 1:
+        return Image.fromarray(bands[0], mode="L")
+    elif raster_count == 2:
+        return Image.merge("LA", (Image.fromarray(bands[0]), Image.fromarray(bands[1])))
+    elif raster_count == 3:
+        return Image.merge("RGB", tuple(Image.fromarray(a) for a in bands))
+    elif raster_count == 4:
+        return Image.merge("RGBA", tuple(Image.fromarray(a) for a in bands))
     else:
-        return Image.fromarray(rgb, mode="RGB")
+        raise ValueError(f"Unsupported number of bands: {raster_count}")
