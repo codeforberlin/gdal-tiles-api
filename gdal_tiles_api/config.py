@@ -15,6 +15,7 @@ class Map(BaseModel):
     dataset: str | None = None
     name: str | None = None
     attribution: dict | None = None
+    rights: dict | None = None
 
     def get_url(self, host):
         return f"{host}/{self.path}/{{z}}/{{x}}/{{y}}.png"

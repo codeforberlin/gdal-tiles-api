@@ -33,6 +33,7 @@ def read_map(path: Path):
         "name": map_config.name,
         "url": map_config.get_url(config.tiles.host),
         "attribution": map_config.attribution,
+        "rights": map_config.rights,
     }
 
 
