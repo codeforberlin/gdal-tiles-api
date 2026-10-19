@@ -78,7 +78,7 @@ ignore = [
     "RUF012", # mutable-class-default
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = [
     "gdal_tiles_api"
 ]
@@ -92,7 +92,7 @@ section-order = [
     "local-folder"
 ]
 
-[tool.ruff.isort.sections]
+[tool.ruff.lint.isort.sections]
 pytest = ["pytest"]
 fastapi = ["fastapi"]
 

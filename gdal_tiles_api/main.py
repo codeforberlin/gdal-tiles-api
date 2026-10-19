@@ -13,14 +13,7 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return (
-        {
-            "name": map_config.name,
-            "url": map_config.get_url(config.tiles.host),
-            "attribution": map_config.attribution,
-        }
-        for map_config in config.maps
-    )
+    return [map_config.to_dict(config) for map_config in config.maps]
 
 
 @app.get("/{path:path}/")
@@ -29,12 +22,7 @@ def read_map(path: Path):
     if map_config is None:
         raise HTTPException(status_code=404, detail="No map found under this path.")
 
-    return {
-        "name": map_config.name,
-        "url": map_config.get_url(config.tiles.host),
-        "attribution": map_config.attribution,
-        "rights": map_config.rights,
-    }
+    return map_config.to_dict(config)
 
 
 @app.get("/{path:path}/{z:int}/{x:int}/{y:int}.png")
