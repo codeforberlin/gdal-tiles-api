@@ -45,32 +45,23 @@ class Map(BaseModel):
         parts = [ref.to_html() for ref in (self.attribution, self.rights) if ref]
         return " / ".join(parts) or None
 
-    def get_options(self, config):
-        options = {}
-
-        attribution = self.get_attribution()
-        if attribution is not None:
-            options["attribution"] = attribution
-
-        min_zoom = self.min_zoom if self.min_zoom is not None else config.tiles.min_zoom
-        if min_zoom is not None:
-            options["minZoom"] = min_zoom
-
-        max_zoom = self.max_zoom if self.max_zoom is not None else config.tiles.max_zoom
-        if max_zoom is not None:
-            options["maxZoom"] = max_zoom
-
-        return options
-
     def to_dict(self, config):
         data = {
             "name": self.name,
             "url": self.get_url(config),
         }
 
-        options = self.get_options(config)
-        if options:
-            data["options"] = options
+        attribution = self.get_attribution()
+        if attribution is not None:
+            data["attribution"] = attribution
+
+        min_zoom = self.min_zoom if self.min_zoom is not None else config.tiles.min_zoom
+        if min_zoom is not None:
+            data["minZoom"] = min_zoom
+
+        max_zoom = self.max_zoom if self.max_zoom is not None else config.tiles.max_zoom
+        if max_zoom is not None:
+            data["maxZoom"] = max_zoom
 
         return data
 
